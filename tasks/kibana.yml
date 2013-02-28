@@ -1,0 +1,62 @@
+---
+# Install Kibana dependencies
+- name: "Install Kibana dependencies"
+  apt: pkg=${item} state=installed update-cache=yes
+  with_items: ${kibana.dependencies}
+  tags:
+    - kibana
+
+# Install Kibana gems
+- include: tasks/gems.yml
+  with_items: ${kibana.gems}
+
+# Fetch Kibana
+- name: "Fetch Kibana: ${kibana.url}/${kibana.tarball}"
+  get_url: url=${kibana.url}/${kibana.tarball} dest=${tmp_dir} thirsty=yes mode=0440
+  register: get_kibana
+  tags:
+    - kibana
+
+# Create Kibana destination
+- name: "Create Kibana directory: ${kibana.dir}"
+  file: path=${kibana.dir} group=root owner=root mode=0755 state=directory
+  tags:
+    - kibana
+
+# Extract Kibana
+- name: "Extract Kibana ${kibana.tarball} to: ${kibana.dir}"
+  command: tar xfvz ${tmp_dir}/${kibana.tarball} chdir=${kibana.dir} creates="${kibana.dir}/Kibana-0.2.0/README.md"
+  register: new_kibana
+  tags:
+    - kibana
+
+# Bundle install
+- name: "Bundle install Kibana"
+  command: bundle install chdir=${kibana.dir}/Kibana-0.2.0
+  when_set: ${new_kibana}
+  tags:
+    - kibana
+
+# Change Elasticsearch IP
+- name: "Change Elasticsearch IP ${with_elasticsearch_ip} in ${kibana.config}"
+  lineinfile: dest=${kibana.dir}/Kibana-0.2.0/${kibana.config} state=present regexp="Elasticsearch = \".*:9200\"" line="Elasticsearch = \"${with_elasticsearch_ip}:9200\""
+  tags:
+    - kibana
+
+# Change Kibana IP
+- name: "Change Kibana IP in ${kibana.config}"
+  lineinfile: dest=${kibana.dir}/Kibana-0.2.0/${kibana.config} state=present regexp="KibanaHost = '.*'" line="KibanaHost = '0.0.0.0'"
+  tags:
+    - kibana
+
+# # Install Kibana init script
+# - name: "Install Kibana init script"
+#   template: src=templates/kibana.j2 dest=/etc/init.d/${kibana.service} owner=root group=root mode=0755
+#   tags:
+#     - kibana
+
+# # Ensure Kibana is running
+# - name: "Ensure Kibana is running"
+#   service: name=${kibana.service} state=started
+#   tags:
+#     - kibana

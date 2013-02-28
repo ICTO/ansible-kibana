@@ -1,0 +1,3 @@
+---
+# Install Kibana
+- include: tasks/kibana.yml
