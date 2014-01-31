@@ -1,3 +1,0 @@
----
-- name: "Restart Kibana"
-  service: name=${kibana.service} state=restarted

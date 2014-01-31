@@ -1,0 +1,7 @@
+---
+kibana:
+  url: 'http://download.elasticsearch.org/kibana/kibana/kibana-latest.zip'
+  dir: '/var/www'
+  webroot: '/var/www/kibana'
+  temp_file: '/tmp/kibana.zip'
+  config: 'KibanaConfig.rb'
