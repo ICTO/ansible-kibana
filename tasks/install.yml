@@ -6,7 +6,7 @@
   file: path={{ kibana.dir }} owner=root group=root mode=0755 state=directory
 
 - name: 'Unzip kibana release to install directory'
-  command: unzip -u {{ kibana.temp_file }} -d {{ kibana.dir }}
+  command: unzip -u -o {{ kibana.temp_file }} -d {{ kibana.dir }}
 
 - name: 'symlink install directory to webroot'
   file: src={{ kibana.dir}}/kibana-latest dest={{kibana.webroot}} state=link
